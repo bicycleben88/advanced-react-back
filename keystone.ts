@@ -8,6 +8,8 @@ import {
 import { User } from "./schemas/User";
 import { Product } from "./schemas/Product";
 import { ProductImage } from "./schemas/ProductImage";
+import { insertSeedData } from "./seed-data";
+import { sendPasswordResetEmail } from "./lib/mail";
 
 const databaseURL =
   process.env.DATABASE_URL || "mongodb://localhost/sicks-fitz";
@@ -25,6 +27,11 @@ const { withAuth } = createAuth({
     fields: ["name", "email", "password"],
     // todo add initial roles here
   },
+  passwordResetLink: {
+    async sendToken(args) {
+      await sendPasswordResetEmail(args.token, args.identity);
+    },
+  },
 });
 
 export default withAuth(
@@ -38,7 +45,12 @@ export default withAuth(
     db: {
       adapter: "mongoose",
       url: databaseURL,
-      //todo add seeding data here
+      async onConnect(keystone) {
+        console.log("I'm connected to DB");
+        if (process.argv.includes("--seed-data")) {
+          await insertSeedData(keystone);
+        }
+      },
     },
     lists: createSchema({
       User,
