@@ -11,6 +11,7 @@ import { ProductImage } from "./schemas/ProductImage";
 import { insertSeedData } from "./seed-data";
 import { sendPasswordResetEmail } from "./lib/mail";
 import { CartItem } from "./schemas/CartItem";
+import { extendGraphqlSchema } from "./mutations";
 
 const databaseURL =
   process.env.DATABASE_URL || "mongodb://localhost/sicks-fitz";
@@ -63,6 +64,7 @@ export default withAuth(
       // change this for roles
       isAccessAllowed: ({ session }) => !!session?.data,
     },
+    extendGraphqlSchema,
     session: withItemData(statelessSessions(sessionConfig), {
       // GraphQl query
       User: "id name email",
